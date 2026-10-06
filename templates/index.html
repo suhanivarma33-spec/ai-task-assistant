@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Taskmate — Keep your day moving</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Taskmate home"><span class="brand-mark">t.</span> taskmate</a>
+    <span class="top-note">A little more focus, every day.</span>
+  </header>
+
+  <main class="layout">
+    <section class="intro">
+      <p class="eyebrow">YOUR PERSONAL WORKSPACE</p>
+      <h1>Make room for<br><span>what matters.</span></h1>
+      <p class="intro-copy">One place for your tasks, priorities, and next small step.</p>
+      <div class="stats">
+        <div class="stat"><span class="stat-number">{{ total }}</span><span class="stat-label">Total tasks</span></div>
+        <div class="stat"><span class="stat-number">{{ completed }}</span><span class="stat-label">Completed</span></div>
+      </div>
+      <div class="tip"><span class="tip-icon">✳</span><div><strong>Small steps count.</strong><p>Choose one thing and give it your attention.</p></div></div>
+    </section>
+
+    <section class="workspace">
+      <div class="section-heading">
+        <div><p class="eyebrow">YOUR LIST</p><h2>Today's tasks</h2></div>
+        <span class="count-pill">{{ total - completed }} left</span>
+      </div>
+
+      <form class="task-form" action="{{ url_for('add_task') }}" method="post">
+        <label for="title">Add a new task</label>
+        <input id="title" name="title" maxlength="120" placeholder="What would you like to get done?" required>
+        <textarea id="details" name="details" maxlength="500" rows="2" placeholder="A little detail (optional)"></textarea>
+        <div class="form-bottom">
+          <label class="priority-label" for="priority">Priority
+            <select id="priority" name="priority">
+              <option>Low</option><option selected>Medium</option><option>High</option>
+            </select>
+          </label>
+          <button class="primary-button" type="submit">＋ Add task</button>
+        </div>
+      </form>
+
+      <div class="task-list">
+        {% for task in tasks %}
+        <article class="task-item {% if task['completed'] %}is-complete{% endif %}">
+          <form action="{{ url_for('toggle_task', task_id=task['id']) }}" method="post">
+            <button class="check-button" aria-label="{% if task['completed'] %}Mark incomplete{% else %}Mark complete{% endif %}" title="Toggle complete" type="submit">{% if task['completed'] %}✓{% endif %}</button>
+          </form>
+          <div class="task-content">
+            <h3>{{ task['title'] }}</h3>
+            {% if task['details'] %}<p>{{ task['details'] }}</p>{% endif %}
+            <span class="priority priority-{{ task['priority']|lower }}">{{ task['priority'] }} priority</span>
+          </div>
+          <form action="{{ url_for('delete_task', task_id=task['id']) }}" method="post">
+            <button class="delete-button" type="submit" aria-label="Delete task" title="Delete task">×</button>
+          </form>
+        </article>
+        {% else %}
+        <div class="empty-state"><span>✎</span><h3>Your list starts here</h3><p>Add one task above and build momentum.</p></div>
+        {% endfor %}
+      </div>
+
+      <section class="assistant">
+        <div class="assistant-title"><span class="assistant-icon">✦</span><div><h3>Need a starting point?</h3><p>Get a quick plan for any task.</p></div></div>
+        <form id="suggestion-form">
+          <label class="sr-only" for="suggestion-task">Task to break down</label>
+          <input id="suggestion-task" placeholder="e.g. Prepare my presentation" required>
+          <button class="secondary-button" type="submit">Get a plan</button>
+        </form>
+        <p id="suggestion-result" class="suggestion-result" aria-live="polite"></p>
+        <p class="demo-note">Built-in demo helper · no API key required</p>
+      </section>
+    </section>
+  </main>
+  <footer>Made for calmer, more focused days.</footer>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
